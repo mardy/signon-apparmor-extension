@@ -19,8 +19,7 @@ QMAKE_CXXFLAGS += \
     -fvisibility=hidden
 
 PKGCONFIG += \
-    SignOnExtension \
-    libapparmor
+    SignOnExtension
 
 # The following use of pkg-config + sed is a hack to workaround a qmake
 # limitation: the CFLAGS variable is not used with the moc compiler, so the
