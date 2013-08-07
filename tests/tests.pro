@@ -19,9 +19,6 @@ PKGCONFIG += \
 DEFINES += \
     PLUGIN_PATH=\\\"../src/libsignon-apparmor-ac.so\\\"
 
-HEADERS = \
-    tst_extension.h
-
 SOURCES = \
     tst_extension.cpp
 

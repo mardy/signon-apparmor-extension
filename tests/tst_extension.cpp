@@ -19,12 +19,27 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tst_extension.h"
-
 #include <QDBusMessage>
 #include <QDebug>
 #include <QPluginLoader>
 #include <QTest>
+
+#include <SignOn/AbstractAccessControlManager>
+
+class ExtensionTest: public QObject
+{
+    Q_OBJECT
+
+private Q_SLOTS:
+    void initTestCase();
+    void test_appId();
+    void test_access();
+    void test_accessWildcard();
+    void cleanupTestCase();
+
+private:
+    SignOn::AbstractAccessControlManager *m_acm;
+};
 
 void ExtensionTest::initTestCase()
 {
@@ -62,10 +77,20 @@ void ExtensionTest::test_access()
     QVERIFY(!allowed);
 }
 
+void ExtensionTest::test_accessWildcard()
+{
+    /* forge a QDBusMessage */
+    QDBusMessage msg =
+        QDBusMessage::createMethodCall(":0.3", "/", "my.interface", "hi");
+    bool allowed = m_acm->isPeerAllowedToAccess(msg, "*");
+    /* Everything is allowed to access "*" */
+    QVERIFY(allowed);
+}
+
 void ExtensionTest::cleanupTestCase()
 {
     delete m_acm;
 }
 
 QTEST_MAIN(ExtensionTest)
-
+#include "tst_extension.moc"

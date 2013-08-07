@@ -1,4 +1,5 @@
 *.log
+*.moc
 *.o
 *.substvars
 /debian/files

@@ -46,7 +46,8 @@ bool AccessControlManager::isPeerAllowedToAccess(const QDBusMessage &peerMessage
 {
     QString appId = appIdOfPeer(peerMessage);
 
-    bool allowed = (appId == securityContext);
+    bool allowed = (appId == securityContext ||
+                    securityContext == QLatin1String("*"));
     qDebug() << "Process" << appId << "access to" << securityContext <<
         (allowed ? "ALLOWED" : "DENIED");
     return allowed;
