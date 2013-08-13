@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 9),
                qt5-default,
                qt5-qmake,
                signond-dev,
-Standards-Version: 3.9.3
+Standards-Version: 3.9.4
 Section: libs
 Homepage: https://launchpad.net/signon-apparmor-extension
 # If you aren't a member of ~online-accounts but need to upload packaging changes,
