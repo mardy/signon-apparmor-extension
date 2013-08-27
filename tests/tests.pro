@@ -22,7 +22,7 @@ DEFINES += \
 SOURCES = \
     tst_extension.cpp
 
-check.commands = "./$${TARGET}"
+check.commands = "dbus-test-runner -t ./$${TARGET}"
 check.depends = $${TARGET}
 QMAKE_EXTRA_TARGETS += check
 
