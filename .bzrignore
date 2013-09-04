@@ -4,6 +4,7 @@
 *.substvars
 /debian/files
 /debian/signon-apparmor-extension/
-Makefile
+Makefile*
 moc_*
+/tests/mock/libapparmor.so*
 /tests/tst_extension

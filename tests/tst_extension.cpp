@@ -19,27 +19,43 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QDBusConnection>
 #include <QDBusMessage>
+#include <QDBusServer>
 #include <QDebug>
 #include <QPluginLoader>
 #include <QTest>
 
 #include <SignOn/AbstractAccessControlManager>
 
+#define P2P_SOCKET "unix:path=/tmp/tst_extension_%1"
+
 class ExtensionTest: public QObject
 {
     Q_OBJECT
 
+public:
+    ExtensionTest();
+
 private Q_SLOTS:
     void initTestCase();
     void test_appId();
+    void test_appId_p2p();
     void test_access();
     void test_accessWildcard();
     void cleanupTestCase();
 
 private:
     SignOn::AbstractAccessControlManager *m_acm;
+    QDBusConnection m_busConnection;
+    QDBusConnection m_p2pConnection;
 };
+
+ExtensionTest::ExtensionTest():
+    m_busConnection(QDBusConnection::sessionBus()),
+    m_p2pConnection(QStringLiteral("uninitialized"))
+{
+}
 
 void ExtensionTest::initTestCase()
 {
@@ -53,25 +69,55 @@ void ExtensionTest::initTestCase()
 
     m_acm = interface->accessControlManager(this);
     QVERIFY(m_acm != 0);
+
+    QDBusServer *server;
+    for (int i = 0; i < 10; i++) {
+        server = new QDBusServer(QString::fromLatin1(P2P_SOCKET).arg(i), this);
+        if (!server->isConnected()) {
+            delete server;
+        } else {
+            break;
+        }
+    }
+
+    QVERIFY(server->isConnected());
+
+    m_p2pConnection = QDBusConnection::connectToPeer(server->address(),
+                                                     QStringLiteral("tst"));
+    QVERIFY(m_p2pConnection.isConnected());
 }
 
 void ExtensionTest::test_appId()
 {
     /* forge a QDBusMessage */
     QDBusMessage msg =
-        QDBusMessage::createMethodCall(":0.3", "/", "my.interface", "hi");
-    QString appId = m_acm->appIdOfPeer(msg);
+        QDBusMessage::createMethodCall(m_busConnection.baseService(),
+                                       "/", "my.interface", "hi");
+    QString appId = m_acm->appIdOfPeer(m_busConnection, msg);
     /* At the moment, AppArmor doesn't implement the
      * GetConnectionAppArmorSecurityContext method, so expect an error. */
-    QCOMPARE(appId, QString());
+    QCOMPARE(appId, QStringLiteral("unconfined"));
+}
+
+void ExtensionTest::test_appId_p2p()
+{
+    /* forge a QDBusMessage */
+    QDBusMessage msg =
+        QDBusMessage::createMethodCall("", "/", "my.interface", "hi");
+    QString appId = m_acm->appIdOfPeer(m_p2pConnection, msg);
+    /* At the moment, AppArmor doesn't implement the
+     * GetConnectionAppArmorSecurityContext method, so expect an error. */
+    QCOMPARE(appId, QStringLiteral("unconfined"));
 }
 
 void ExtensionTest::test_access()
 {
     /* forge a QDBusMessage */
     QDBusMessage msg =
-        QDBusMessage::createMethodCall(":0.3", "/", "my.interface", "hi");
-    bool allowed = m_acm->isPeerAllowedToAccess(msg, "anyContext");
+        QDBusMessage::createMethodCall(m_busConnection.baseService(),
+                                       "/", "my.interface", "hi");
+    bool allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
+                                                "anyContext");
     /* At the moment, AppArmor doesn't implement the
      * GetConnectionAppArmorSecurityContext method, so expect an error. */
     QVERIFY(!allowed);
@@ -81,8 +127,9 @@ void ExtensionTest::test_accessWildcard()
 {
     /* forge a QDBusMessage */
     QDBusMessage msg =
-        QDBusMessage::createMethodCall(":0.3", "/", "my.interface", "hi");
-    bool allowed = m_acm->isPeerAllowedToAccess(msg, "*");
+        QDBusMessage::createMethodCall(m_busConnection.baseService(),
+                                       "/", "my.interface", "hi");
+    bool allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg, "*");
     /* Everything is allowed to access "*" */
     QVERIFY(allowed);
 }

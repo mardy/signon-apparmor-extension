@@ -1,5 +1,6 @@
-signon-apparmor-extension (0.0-0ubuntu1) UNRELEASED; urgency=low
+signon-apparmor-extension (0.1-0ubuntu0) UNRELEASED; urgency=low
 
   * Initial implementation.
+  * Support p2p connections.
 
- -- Alberto Mardegan <alberto.mardegan@canonical.com>  Tue, 06 Aug 2013 14:52:28 +0300
+ -- Alberto Mardegan <alberto.mardegan@canonical.com>  Tue, 27 Aug 2013 15:31:46 +0300

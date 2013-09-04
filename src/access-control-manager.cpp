@@ -24,8 +24,18 @@
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDebug>
+#include <dbus/dbus.h>
+#include <sys/apparmor.h>
 
 static const char keychainAppId[] = "SignondKeychain";
+
+AccessReply::AccessReply(const SignOn::AccessRequest &request,
+                         QObject *parent):
+    SignOn::AccessReply(request, parent)
+{
+    /* Always decline */
+    QMetaObject::invokeMethod(this, "decline", Qt::QueuedConnection);
+}
 
 AccessControlManager::AccessControlManager(QObject *parent):
     SignOn::AbstractAccessControlManager(parent)
@@ -41,10 +51,12 @@ QString AccessControlManager::keychainWidgetAppId()
     return QLatin1String(keychainAppId);
 }
 
-bool AccessControlManager::isPeerAllowedToAccess(const QDBusMessage &peerMessage,
-                                                 const QString &securityContext)
+bool AccessControlManager::isPeerAllowedToAccess(
+                                       const QDBusConnection &peerConnection,
+                                       const QDBusMessage &peerMessage,
+                                       const QString &securityContext)
 {
-    QString appId = appIdOfPeer(peerMessage);
+    QString appId = appIdOfPeer(peerConnection, peerMessage);
 
     bool allowed = (appId == securityContext ||
                     securityContext == QLatin1String("*"));
@@ -53,27 +65,57 @@ bool AccessControlManager::isPeerAllowedToAccess(const QDBusMessage &peerMessage
     return allowed;
 }
 
-QString AccessControlManager::appIdOfPeer(const QDBusMessage &peerMessage)
+QString AccessControlManager::appIdOfPeer(const QDBusConnection &peerConnection,
+                                          const QDBusMessage &peerMessage)
 {
     QString uniqueConnectionId = peerMessage.service();
     QString appId;
 
-    QDBusMessage msg =
-        QDBusMessage::createMethodCall("org.freedesktop.DBus",
-                                       "/org/freedesktop/DBus",
-                                       "org.freedesktop.DBus",
-                                       "GetConnectionAppArmorSecurityContext");
-    QVariantList args;
-    args << uniqueConnectionId;
-    msg.setArguments(args);
-    QDBusMessage reply =
-        QDBusConnection::sessionBus().call(msg, QDBus::Block);
-    if (reply.type() == QDBusMessage::ReplyMessage) {
-        appId = reply.arguments().value(0, QString()).toString();
-        qDebug() << "App ID:" << appId;
+    if (uniqueConnectionId.isEmpty()) {
+        /* it's a p2p connection; get the fd of the socket, and ask apparmor to
+         * identify the peer. */
+        DBusConnection *connection =
+            (DBusConnection *)peerConnection.internalPointer();
+        int fd = 0;
+        dbus_bool_t ok = dbus_connection_get_unix_fd(connection, &fd);
+        if (Q_LIKELY(ok)) {
+            char *con = NULL, *mode = NULL;
+            int ret = aa_getpeercon(fd, &con, &mode);
+            if (Q_LIKELY(ret >= 0)) {
+                appId = QString::fromUtf8(con);
+                qDebug() << "App ID:" << appId;
+                free(con);
+                if (mode) free(mode);
+            } else {
+                qWarning() << "Couldn't get apparmor profile of peer";
+            }
+        } else {
+            qWarning() << "Couldn't get fd of caller!";
+        }
     } else {
-        qWarning() << "Error getting app ID:" << reply.errorName() <<
-            reply.errorMessage();
+        QDBusMessage msg =
+            QDBusMessage::createMethodCall("org.freedesktop.DBus",
+                                           "/org/freedesktop/DBus",
+                                           "org.freedesktop.DBus",
+                                           "GetConnectionAppArmorSecurityContext");
+        QVariantList args;
+        args << uniqueConnectionId;
+        msg.setArguments(args);
+        QDBusMessage reply =
+            QDBusConnection::sessionBus().call(msg, QDBus::Block);
+        if (reply.type() == QDBusMessage::ReplyMessage) {
+            appId = reply.arguments().value(0, QString()).toString();
+            qDebug() << "App ID:" << appId;
+        } else {
+            qWarning() << "Error getting app ID:" << reply.errorName() <<
+                reply.errorMessage();
+        }
     }
     return appId;
+}
+
+SignOn::AccessReply *
+AccessControlManager::handleRequest(const SignOn::AccessRequest &request)
+{
+    return new AccessReply(request, this);
 }
