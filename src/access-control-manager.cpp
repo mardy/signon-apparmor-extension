@@ -85,7 +85,6 @@ QString AccessControlManager::appIdOfPeer(const QDBusConnection &peerConnection,
                 appId = QString::fromUtf8(con);
                 qDebug() << "App ID:" << appId;
                 free(con);
-                if (mode) free(mode);
             } else {
                 qWarning() << "Couldn't get apparmor profile of peer";
             }
