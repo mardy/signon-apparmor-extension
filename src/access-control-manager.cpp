@@ -119,7 +119,6 @@ AccessControlManager::handleRequest(const SignOn::AccessRequest &request)
     return new AccessReply(request, this);
 }
 
-
 QString AccessControlManager::stripVersion(const QString &appId) const
 {
     QStringList components = appId.split('_');
