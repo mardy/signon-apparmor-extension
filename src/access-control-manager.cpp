@@ -110,11 +110,26 @@ QString AccessControlManager::appIdOfPeer(const QDBusConnection &peerConnection,
                 reply.errorMessage();
         }
     }
-    return appId;
+    return stripVersion(appId);
 }
 
 SignOn::AccessReply *
 AccessControlManager::handleRequest(const SignOn::AccessRequest &request)
 {
     return new AccessReply(request, this);
+}
+
+
+QString AccessControlManager::stripVersion(const QString &appId) const
+{
+    QStringList components = appId.split('_');
+    if (components.count() != 3) return appId;
+
+    /* Click packages have a profile of the form
+     *  $name_$application_$version
+     * (see https://wiki.ubuntu.com/SecurityTeam/Specifications/ApplicationConfinement/Manifest#Click)
+     *
+     * We assume that this is a click package, and strip out the last part.
+     */
+    return components.join('_');
 }

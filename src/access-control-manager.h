@@ -51,6 +51,9 @@ public:
 
     SignOn::AccessReply *handleRequest(const SignOn::AccessRequest &request)
         Q_DECL_OVERRIDE;
+
+private:
+    QString stripVersion(const QString &appId) const;
 };
 
 #endif // SIGNON_APPARMOR_ACCESS_CONTROL_MANAGER_H
