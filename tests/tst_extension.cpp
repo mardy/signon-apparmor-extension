@@ -89,6 +89,8 @@ void ExtensionTest::initTestCase()
 
 void ExtensionTest::test_appId()
 {
+    QSKIP("Disable because of QTBUG-36475");
+
     /* forge a QDBusMessage */
     QDBusMessage msg =
         QDBusMessage::createMethodCall(m_busConnection.baseService(),
@@ -112,6 +114,8 @@ void ExtensionTest::test_appId_p2p()
 
 void ExtensionTest::test_access()
 {
+    QSKIP("Disable because of QTBUG-36475");
+
     /* forge a QDBusMessage */
     QDBusMessage msg =
         QDBusMessage::createMethodCall(m_busConnection.baseService(),
@@ -125,6 +129,8 @@ void ExtensionTest::test_access()
 
 void ExtensionTest::test_accessWildcard()
 {
+    QSKIP("Disable because of QTBUG-36475");
+
     /* forge a QDBusMessage */
     QDBusMessage msg =
         QDBusMessage::createMethodCall(m_busConnection.baseService(),
