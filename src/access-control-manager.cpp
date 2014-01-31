@@ -130,5 +130,6 @@ QString AccessControlManager::stripVersion(const QString &appId) const
      *
      * We assume that this is a click package, and strip out the last part.
      */
+    components.removeLast();
     return components.join('_');
 }
