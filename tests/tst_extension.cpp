@@ -30,6 +30,15 @@
 
 #define P2P_SOCKET "unix:path=/tmp/tst_extension_%1"
 
+static void setMockedProfile(const char *profile)
+{
+    if (profile) {
+        qputenv("APPARMOR_MOCK_PROFILE", profile);
+    } else {
+        qunsetenv("APPARMOR_MOCK_PROFILE");
+    }
+}
+
 class ExtensionTest: public QObject
 {
     Q_OBJECT
@@ -41,6 +50,7 @@ private Q_SLOTS:
     void initTestCase();
     void test_appId();
     void test_appId_p2p();
+    void test_click_version();
     void test_access();
     void test_accessWildcard();
     void cleanupTestCase();
@@ -110,6 +120,26 @@ void ExtensionTest::test_appId_p2p()
     /* At the moment, AppArmor doesn't implement the
      * GetConnectionAppArmorSecurityContext method, so expect an error. */
     QCOMPARE(appId, QStringLiteral("unconfined"));
+}
+
+void ExtensionTest::test_click_version()
+{
+    /* forge a QDBusMessage */
+    setMockedProfile("com.ubuntu.myapp_myapp_0.2");
+    QDBusMessage msg =
+        QDBusMessage::createMethodCall("", "/", "my.interface", "hi");
+    bool allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
+                                                "anyContext");
+    QVERIFY(!allowed);
+
+    allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
+                                           "com.ubuntu.myapp_myapp_0.2");
+    QVERIFY(allowed);
+
+    /* A different version of the package should also work */
+    allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
+                                           "com.ubuntu.myapp_myapp_0.1");
+    QVERIFY(allowed);
 }
 
 void ExtensionTest::test_access()

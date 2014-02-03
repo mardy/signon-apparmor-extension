@@ -58,7 +58,7 @@ bool AccessControlManager::isPeerAllowedToAccess(
 {
     QString appId = appIdOfPeer(peerConnection, peerMessage);
 
-    bool allowed = (appId == securityContext ||
+    bool allowed = (stripVersion(appId) == stripVersion(securityContext) ||
                     securityContext == QLatin1String("*"));
     qDebug() << "Process" << appId << "access to" << securityContext <<
         (allowed ? "ALLOWED" : "DENIED");
@@ -110,7 +110,7 @@ QString AccessControlManager::appIdOfPeer(const QDBusConnection &peerConnection,
                 reply.errorMessage();
         }
     }
-    return stripVersion(appId);
+    return appId;
 }
 
 SignOn::AccessReply *
