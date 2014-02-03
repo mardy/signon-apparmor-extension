@@ -24,6 +24,7 @@
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDebug>
+#include <QStringList>
 #include <dbus/dbus.h>
 #include <sys/apparmor.h>
 
