@@ -35,7 +35,11 @@ static void setMockedProfile(const char *profile)
     if (profile) {
         qputenv("APPARMOR_MOCK_PROFILE", profile);
     } else {
+#if QT_VERSION >= 0x050100
         qunsetenv("APPARMOR_MOCK_PROFILE");
+#else
+        qputenv("APPARMOR_MOCK_PROFILE", "");
+#endif
     }
 }
 
@@ -140,6 +144,7 @@ void ExtensionTest::test_click_version()
     allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
                                            "com.ubuntu.myapp_myapp_0.1");
     QVERIFY(allowed);
+    setMockedProfile(NULL);
 }
 
 void ExtensionTest::test_access()
