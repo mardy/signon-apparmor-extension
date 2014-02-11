@@ -24,6 +24,7 @@
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDebug>
+#include <QStringList>
 #include <dbus/dbus.h>
 #include <sys/apparmor.h>
 
@@ -58,7 +59,7 @@ bool AccessControlManager::isPeerAllowedToAccess(
 {
     QString appId = appIdOfPeer(peerConnection, peerMessage);
 
-    bool allowed = (appId == securityContext ||
+    bool allowed = (stripVersion(appId) == stripVersion(securityContext) ||
                     securityContext == QLatin1String("*"));
     qDebug() << "Process" << appId << "access to" << securityContext <<
         (allowed ? "ALLOWED" : "DENIED");
@@ -117,4 +118,19 @@ SignOn::AccessReply *
 AccessControlManager::handleRequest(const SignOn::AccessRequest &request)
 {
     return new AccessReply(request, this);
+}
+
+QString AccessControlManager::stripVersion(const QString &appId) const
+{
+    QStringList components = appId.split('_');
+    if (components.count() != 3) return appId;
+
+    /* Click packages have a profile of the form
+     *  $name_$application_$version
+     * (see https://wiki.ubuntu.com/SecurityTeam/Specifications/ApplicationConfinement/Manifest#Click)
+     *
+     * We assume that this is a click package, and strip out the last part.
+     */
+    components.removeLast();
+    return components.join('_');
 }

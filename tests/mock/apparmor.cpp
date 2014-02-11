@@ -19,6 +19,7 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QByteArray>
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDebug>
@@ -26,11 +27,17 @@
 
 #define UNCONFINED_PROFILE "unconfined"
 
+QByteArray mockedProfile()
+{
+    QByteArray envVariable = qgetenv("APPARMOR_MOCK_PROFILE");
+    return envVariable.isEmpty() ? UNCONFINED_PROFILE : envVariable;
+}
+
 int aa_getpeercon(int fd, char **con, char **mode)
 {
     Q_UNUSED(fd);
     Q_UNUSED(mode);
-    *con = strdup(UNCONFINED_PROFILE);
+    *con = strdup(mockedProfile().constData());
     return 0;
 }
 
@@ -40,5 +47,5 @@ QDBusMessage QDBusConnection::call(const QDBusMessage &message,
 {
     Q_UNUSED(mode);
     Q_UNUSED(timeout);
-    return message.createReply(QVariantList() << QStringLiteral(UNCONFINED_PROFILE));
+    return message.createReply(QVariantList() << mockedProfile().constData());
 }
