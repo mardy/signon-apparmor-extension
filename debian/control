@@ -1,20 +1,21 @@
 Source: signon-apparmor-extension
 Priority: optional
 Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
-Build-Depends: debhelper (>= 9),
+Build-Depends: dbus-test-runner,
+               debhelper (>= 9),
+               libapparmor-dev,
+               libdbus-1-dev,
                pkg-config,
                qt5-default,
                qt5-qmake,
-               libapparmor-dev,
-               libdbus-1-dev,
                signond-dev (>= 8.53),
-               dbus-test-runner,
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Section: libs
 Homepage: https://launchpad.net/signon-apparmor-extension
-# If you aren't a member of ~online-accounts but need to upload packaging changes,
-# just go ahead.  ~online-accounts will notice and sync up the code again.
-Vcs-Bzr: https://code.launchpad.net/~online-accounts/signon-apparmor-extension/trunk
+# if you don't have have commit access to this branch but would like to upload
+# directly to Ubuntu, don't worry: your changes will be merged back into the
+# upstream branch
+Vcs-Bzr: lp:signon-apparmor-extension
 Vcs-Browser: https://bazaar.launchpad.net/~online-accounts/signon-apparmor-extension/trunk/files
 
 Package: signon-apparmor-extension
