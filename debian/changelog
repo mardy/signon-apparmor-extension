@@ -2,6 +2,5 @@ signon-apparmor-extension (0.1-0ubuntu1) UNRELEASED; urgency=low
 
   * Initial implementation.
   * Support p2p connections.
-  * No change rebuild.
 
  -- Alberto Mardegan <alberto.mardegan@canonical.com>  Mon, 12 May 2014 12:15:55 +0300
