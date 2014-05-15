@@ -1,6 +1,16 @@
-signon-apparmor-extension (0.1-0ubuntu1) UNRELEASED; urgency=low
+signon-apparmor-extension (0.1+14.10.20140515-0ubuntu1) utopic; urgency=low
 
+  [ Alberto Mardegan ]
   * Initial implementation.
   * Support p2p connections.
+  * Initial implementation.
+  * The "mode" string must not be free'd It's in the same allocated area
+    as the "con" variable. .
+  * Strip out the version information for click applications This makes
+    it so that different versions of the same application are treated
+    the same way. (LP: #1274934)
 
- -- Alberto Mardegan <alberto.mardegan@canonical.com>  Mon, 12 May 2014 12:15:55 +0300
+  [ Ken VanDine ]
+  * Initial implementation.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 15 May 2014 17:35:20 +0000
