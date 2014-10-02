@@ -60,7 +60,10 @@ bool AccessControlManager::isPeerAllowedToAccess(
     QString appId = appIdOfPeer(peerConnection, peerMessage);
 
     bool allowed = (stripVersion(appId) == stripVersion(securityContext) ||
-                    securityContext == QLatin1String("*"));
+                    securityContext == QLatin1String("*") ||
+                    /* Temporary workaround for
+                     * https://bugs.launchpad.net/bugs/1376445 */
+                    appId == QStringLiteral("unconfined"));
     qDebug() << "Process" << appId << "access to" << securityContext <<
         (allowed ? "ALLOWED" : "DENIED");
     return allowed;
