@@ -57,6 +57,7 @@ private Q_SLOTS:
     void test_click_version();
     void test_access();
     void test_accessWildcard();
+    void test_unconfined();
     void cleanupTestCase();
 
 private:
@@ -173,6 +174,22 @@ void ExtensionTest::test_accessWildcard()
     bool allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg, "*");
     /* Everything is allowed to access "*" */
     QVERIFY(allowed);
+}
+
+void ExtensionTest::test_unconfined()
+{
+    /* forge a QDBusMessage */
+    setMockedProfile("unconfined");
+    QDBusMessage msg =
+        QDBusMessage::createMethodCall("", "/", "my.interface", "hi");
+    bool allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
+                                                "anyContext");
+    QVERIFY(allowed);
+
+    allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
+                                           "com.ubuntu.myapp_myapp_0.2");
+    QVERIFY(allowed);
+    setMockedProfile(NULL);
 }
 
 void ExtensionTest::cleanupTestCase()
