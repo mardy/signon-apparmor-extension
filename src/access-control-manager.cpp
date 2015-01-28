@@ -25,10 +25,9 @@
 #include <QDBusMessage>
 #include <QDebug>
 #include <QStringList>
-#include <dbus/dbus.h>
 #include <sys/apparmor.h>
 
-static const char keychainAppId[] = "SignondKeychain";
+static const char keychainAppId[] = "unconfined";
 
 AccessReply::AccessReply(const SignOn::AccessRequest &request,
                          QObject *parent):
@@ -72,29 +71,15 @@ bool AccessControlManager::isPeerAllowedToAccess(
 QString AccessControlManager::appIdOfPeer(const QDBusConnection &peerConnection,
                                           const QDBusMessage &peerMessage)
 {
+    Q_UNUSED(peerConnection);
+
     QString uniqueConnectionId = peerMessage.service();
     QString appId;
 
     if (uniqueConnectionId.isEmpty()) {
-        /* it's a p2p connection; get the fd of the socket, and ask apparmor to
-         * identify the peer. */
-        DBusConnection *connection =
-            (DBusConnection *)peerConnection.internalPointer();
-        int fd = 0;
-        dbus_bool_t ok = dbus_connection_get_unix_fd(connection, &fd);
-        if (Q_LIKELY(ok)) {
-            char *con = NULL, *mode = NULL;
-            int ret = aa_getpeercon(fd, &con, &mode);
-            if (Q_LIKELY(ret >= 0)) {
-                appId = QString::fromUtf8(con);
-                qDebug() << "App ID:" << appId;
-                free(con);
-            } else {
-                qWarning() << "Couldn't get apparmor profile of peer";
-            }
-        } else {
-            qWarning() << "Couldn't get fd of caller!";
-        }
+        /* it's a p2p connection; we treat the peer as "unconfined" */
+        qDebug() << "Client connected via P2P socket; treating as unconfined";
+        appId = "unconfined";
     } else {
         QDBusMessage msg =
             QDBusMessage::createMethodCall("org.freedesktop.DBus",

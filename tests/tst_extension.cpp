@@ -122,8 +122,6 @@ void ExtensionTest::test_appId_p2p()
     QDBusMessage msg =
         QDBusMessage::createMethodCall("", "/", "my.interface", "hi");
     QString appId = m_acm->appIdOfPeer(m_p2pConnection, msg);
-    /* At the moment, AppArmor doesn't implement the
-     * GetConnectionAppArmorSecurityContext method, so expect an error. */
     QCOMPARE(appId, QStringLiteral("unconfined"));
 }
 
@@ -132,7 +130,7 @@ void ExtensionTest::test_click_version()
     /* forge a QDBusMessage */
     setMockedProfile("com.ubuntu.myapp_myapp_0.2");
     QDBusMessage msg =
-        QDBusMessage::createMethodCall("", "/", "my.interface", "hi");
+        QDBusMessage::createMethodCall(":0.1", "/", "my.interface", "hi");
     bool allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
                                                 "anyContext");
     QVERIFY(!allowed);
