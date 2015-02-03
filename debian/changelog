@@ -1,3 +1,16 @@
+signon-apparmor-extension (0.1+15.04.20150203-0ubuntu1) vivid; urgency=medium
+
+  [ CI bot ]
+  * Resync trunk
+
+  [ Alberto Mardegan ]
+  * Treat p2p clients as unconfined (LP: #1415492)
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 03 Feb 2015 13:10:00 +0000
+
 signon-apparmor-extension (0.1+14.10.20141002-0ubuntu1) 14.09; urgency=low
 
   [ CI bot ]
