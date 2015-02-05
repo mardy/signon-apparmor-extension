@@ -1,3 +1,10 @@
+signon-apparmor-extension (0.1+15.04.20150205~rtm-0ubuntu1) 14.09; urgency=medium
+
+  [ Alberto Mardegan ]
+  * Treat p2p clients as unconfined (LP: #1415492)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 05 Feb 2015 14:42:53 +0000
+
 signon-apparmor-extension (0.1+14.10.20141002-0ubuntu1) 14.09; urgency=low
 
   [ CI bot ]
