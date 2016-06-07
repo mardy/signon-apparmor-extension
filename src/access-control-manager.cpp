@@ -62,7 +62,10 @@ bool AccessControlManager::isPeerAllowedToAccess(
                     securityContext == QLatin1String("*") ||
                     /* Temporary workaround for
                      * https://bugs.launchpad.net/bugs/1376445 */
-                    appId == QStringLiteral("unconfined"));
+                    appId == QStringLiteral("unconfined") ||
+                    /* Let the dash access any account:
+                     * https://bugs.launchpad.net/bugs/1589444 */
+                    appId == QStringLiteral("unity8-dash"));
     qDebug() << "Process" << appId << "access to" << securityContext <<
         (allowed ? "ALLOWED" : "DENIED");
     return allowed;
