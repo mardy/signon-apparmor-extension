@@ -20,8 +20,6 @@
  */
 
 #include <QByteArray>
-#include <QDBusConnection>
-#include <QDBusMessage>
 #include <QDebug>
 #include <sys/apparmor.h>
 
@@ -39,13 +37,4 @@ int aa_getpeercon(int fd, char **con, char **mode)
     Q_UNUSED(mode);
     *con = strdup(mockedProfile().constData());
     return 0;
-}
-
-QDBusMessage QDBusConnection::call(const QDBusMessage &message,
-                                   QDBus::CallMode mode,
-                                   int timeout) const
-{
-    Q_UNUSED(mode);
-    Q_UNUSED(timeout);
-    return message.createReply(QVariantList() << mockedProfile().constData());
 }

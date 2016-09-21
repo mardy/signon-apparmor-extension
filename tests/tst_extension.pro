@@ -14,15 +14,21 @@ QT += \
 QT -= gui
 
 PKGCONFIG += \
-    SignOnExtension
+    SignOnExtension \
+    libqtdbusmock-1 \
+    libqtdbustest-1
 
 DEFINES += \
+    DBUS_MOCK_TEMPLATE=\\\"$${PWD}/dbus.py\\\" \
     PLUGIN_PATH=\\\"../src/libsignon-apparmor-ac.so\\\"
 
 SOURCES = \
     tst_extension.cpp
 
-check.commands = "LD_PRELOAD=mock/libapparmor.so dbus-test-runner -t ./$${TARGET}"
+HEADERS += \
+    fake_dbus.h
+
+check.commands = "LD_PRELOAD=mock/libfakeapparmor.so ./$${TARGET}"
 check.depends = $${TARGET}
 QMAKE_EXTRA_TARGETS += check
 

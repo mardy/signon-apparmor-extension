@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Canonical Ltd.
+ * Copyright (C) 2016 Canonical Ltd.
  *
  * Contact: Alberto Mardegan <alberto.mardegan@canonical.com>
  *
@@ -19,6 +19,8 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "fake_dbus.h"
+
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDBusServer>
@@ -28,7 +30,12 @@
 
 #include <SignOn/AbstractAccessControlManager>
 
+#include <libqtdbusmock/DBusMock.h>
+
+
 #define P2P_SOCKET "unix:path=/tmp/tst_extension_%1"
+
+using namespace QtDBusMock;
 
 static void setMockedProfile(const char *profile)
 {
@@ -47,6 +54,10 @@ class ExtensionTest: public QObject
 {
     Q_OBJECT
 
+    struct SetupEnvironment {
+        SetupEnvironment() { qunsetenv("LD_PRELOAD"); }
+    };
+
 public:
     ExtensionTest();
 
@@ -62,18 +73,29 @@ private Q_SLOTS:
 
 private:
     SignOn::AbstractAccessControlManager *m_acm;
+    SetupEnvironment m_env;
+    QtDBusTest::DBusTestRunner m_dbus;
+    QtDBusMock::DBusMock m_mock;
+    FakeDBus m_fakeDBus;
     QDBusConnection m_busConnection;
     QDBusConnection m_p2pConnection;
 };
 
 ExtensionTest::ExtensionTest():
-    m_busConnection(QDBusConnection::sessionBus()),
+    m_mock(m_dbus),
+    m_fakeDBus(&m_mock),
+    m_busConnection(m_dbus.sessionConnection()),
     m_p2pConnection(QStringLiteral("uninitialized"))
 {
+    DBusMock::registerMetaTypes();
 }
 
 void ExtensionTest::initTestCase()
 {
+    m_dbus.startServices();
+
+    qputenv("SIGNON_APPARMOR_TEST", "1");
+
     QPluginLoader pluginLoader(PLUGIN_PATH);
     QObject *plugin = pluginLoader.instance();
     QVERIFY(plugin != 0);
@@ -127,6 +149,9 @@ void ExtensionTest::test_appId_p2p()
 
 void ExtensionTest::test_click_version()
 {
+    m_fakeDBus.setCredentials(":0.1", {
+        { "LinuxSecurityLabel", QByteArray("com.ubuntu.myapp_myapp_0.2 (enforce)") },
+    });
     /* forge a QDBusMessage */
     setMockedProfile("com.ubuntu.myapp_myapp_0.2");
     QDBusMessage msg =
