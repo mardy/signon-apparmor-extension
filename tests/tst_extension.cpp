@@ -126,15 +126,15 @@ void ExtensionTest::initTestCase()
 
 void ExtensionTest::test_appId()
 {
-    QSKIP("Disable because of QTBUG-36475");
+    m_fakeDBus.setCredentials(m_busConnection.baseService(), {
+        { "LinuxSecurityLabel", QByteArray("unconfined") },
+    });
 
     /* forge a QDBusMessage */
     QDBusMessage msg =
         QDBusMessage::createMethodCall(m_busConnection.baseService(),
                                        "/", "my.interface", "hi");
     QString appId = m_acm->appIdOfPeer(m_busConnection, msg);
-    /* At the moment, AppArmor doesn't implement the
-     * GetConnectionAppArmorSecurityContext method, so expect an error. */
     QCOMPARE(appId, QStringLiteral("unconfined"));
 }
 
@@ -173,23 +173,22 @@ void ExtensionTest::test_click_version()
 
 void ExtensionTest::test_access()
 {
-    QSKIP("Disable because of QTBUG-36475");
-
+    m_fakeDBus.setCredentials(m_busConnection.baseService(), {
+    });
     /* forge a QDBusMessage */
     QDBusMessage msg =
         QDBusMessage::createMethodCall(m_busConnection.baseService(),
                                        "/", "my.interface", "hi");
     bool allowed = m_acm->isPeerAllowedToAccess(m_busConnection, msg,
                                                 "anyContext");
-    /* At the moment, AppArmor doesn't implement the
-     * GetConnectionAppArmorSecurityContext method, so expect an error. */
     QVERIFY(!allowed);
 }
 
 void ExtensionTest::test_accessWildcard()
 {
-    QSKIP("Disable because of QTBUG-36475");
-
+    m_fakeDBus.setCredentials(":0.1", {
+        { "LinuxSecurityLabel", QByteArray("com.ubuntu.myapp_myapp_0.2 (enforce)") },
+    });
     /* forge a QDBusMessage */
     QDBusMessage msg =
         QDBusMessage::createMethodCall(m_busConnection.baseService(),
