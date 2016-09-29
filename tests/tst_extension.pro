@@ -19,7 +19,7 @@ PKGCONFIG += \
     libqtdbustest-1
 
 DEFINES += \
-    DBUS_MOCK_TEMPLATE=\\\"$${PWD}/dbus.py\\\" \
+    DBUS_MOCK_TEMPLATE=\\\"$${PWD}/dbus_apparmor.py\\\" \
     PLUGIN_PATH=\\\"../src/libsignon-apparmor-ac.so\\\"
 
 SOURCES = \
