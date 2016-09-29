@@ -2,6 +2,8 @@
 # Common configuration for all projects.
 #-----------------------------------------------------------------------------
 
+CONFIG += c++11
+
 # we don't like warnings...
 QMAKE_CXXFLAGS += -Werror
 # Disable RTTI
