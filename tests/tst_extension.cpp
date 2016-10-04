@@ -55,6 +55,9 @@ class ExtensionTest: public QObject
     Q_OBJECT
 
     struct SetupEnvironment {
+        /* The test is run with a LD_PRELOAD in order to mock aa_getpeercon();
+         * but we don't want this to propagate to our children: dbus-daemon in
+         * particular won't like it. */
         SetupEnvironment() { qunsetenv("LD_PRELOAD"); }
     };
 
