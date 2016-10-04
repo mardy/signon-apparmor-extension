@@ -22,7 +22,9 @@
 #include "access-control-manager.h"
 
 #include <QDBusConnection>
+#include <QDBusError>
 #include <QDBusMessage>
+#include <QDBusReply>
 #include <QDebug>
 #include <QStringList>
 #include <sys/apparmor.h>
@@ -38,7 +40,9 @@ AccessReply::AccessReply(const SignOn::AccessRequest &request,
 }
 
 AccessControlManager::AccessControlManager(QObject *parent):
-    SignOn::AbstractAccessControlManager(parent)
+    SignOn::AbstractAccessControlManager(parent),
+    m_dbusService(qEnvironmentVariableIsSet("SIGNON_APPARMOR_TEST") ?
+                  "fake.freedesktop.DBus" : "org.freedesktop.DBus")
 {
 }
 
@@ -85,21 +89,26 @@ QString AccessControlManager::appIdOfPeer(const QDBusConnection &peerConnection,
         appId = "unconfined";
     } else {
         QDBusMessage msg =
-            QDBusMessage::createMethodCall("org.freedesktop.DBus",
+            QDBusMessage::createMethodCall(m_dbusService,
                                            "/org/freedesktop/DBus",
                                            "org.freedesktop.DBus",
-                                           "GetConnectionAppArmorSecurityContext");
+                                           "GetConnectionCredentials");
         QVariantList args;
         args << uniqueConnectionId;
         msg.setArguments(args);
-        QDBusMessage reply =
-            QDBusConnection::sessionBus().call(msg, QDBus::Block);
-        if (reply.type() == QDBusMessage::ReplyMessage) {
-            appId = reply.arguments().value(0, QString()).toString();
+        QDBusReply<QVariantMap> reply = QDBusConnection::sessionBus().call(msg, QDBus::Block);
+        if (reply.isValid()) {
+            QVariantMap map = reply.value();
+            QByteArray context = map.value("LinuxSecurityLabel").toByteArray();
+            if (!context.isEmpty()) {
+                aa_splitcon(context.data(), NULL);
+                appId = QString::fromUtf8(context);
+            }
             qDebug() << "App ID:" << appId;
         } else {
-            qWarning() << "Error getting app ID:" << reply.errorName() <<
-                reply.errorMessage();
+            QDBusError error = reply.error();
+            qWarning() << "Error getting app ID:" << error.name() <<
+                error.message();
         }
     }
     return appId;

@@ -1,10 +1,11 @@
 Source: signon-apparmor-extension
 Priority: optional
 Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
-Build-Depends: dbus-test-runner,
-               debhelper (>= 9),
-               libapparmor-dev,
+Build-Depends: debhelper (>= 9),
+               libapparmor-dev (>= 2.9.1-0ubuntu9.1),
                libdbus-1-dev,
+               libqtdbusmock1-dev,
+               libqtdbustest1-dev,
                pkg-config,
                qt5-default,
                qt5-qmake,

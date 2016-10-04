@@ -54,6 +54,9 @@ public:
 
 private:
     QString stripVersion(const QString &appId) const;
+
+private:
+    QString m_dbusService;
 };
 
 #endif // SIGNON_APPARMOR_ACCESS_CONTROL_MANAGER_H

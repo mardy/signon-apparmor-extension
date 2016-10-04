@@ -1,6 +1,6 @@
 include(../../common-project-config.pri)
 
-TARGET = apparmor
+TARGET = fakeapparmor
 TEMPLATE = lib
 
 CONFIG += \
@@ -9,8 +9,7 @@ CONFIG += \
     qt
 
 QT += \
-    core \
-    dbus
+    core
 
 PKGCONFIG += \
     libapparmor
