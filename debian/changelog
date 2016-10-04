@@ -1,3 +1,10 @@
+signon-apparmor-extension (0.1+16.10.20161004-0ubuntu1) yakkety; urgency=medium
+
+  * Use GetConnectionCredentials() method instead of the deprecated
+    apparmor-specific method. (LP: #1489489)
+
+ -- Alberto Mardegan <mardy@users.sourceforge.net>  Tue, 04 Oct 2016 07:19:54 +0000
+
 signon-apparmor-extension (0.1+16.10.20160607.1-0ubuntu1) yakkety; urgency=medium
 
   [ Alberto Mardegan ]
